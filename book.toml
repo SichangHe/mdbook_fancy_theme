@@ -4,3 +4,14 @@ language = "en"
 multilingual = false
 src = "src"
 title = "MDBook Fancy Template"
+curly-quotes = true
+
+[build]
+build-dir = "."
+
+[output.html]
+git-repository-url = "https://github.com/SichangHe/mdbook_fancy_theme"
+
+[output.katex]
+
+[preprocessor.katex]

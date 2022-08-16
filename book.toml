@@ -12,6 +12,9 @@ build-dir = "."
 [output.html]
 git-repository-url = "https://github.com/SichangHe/mdbook_fancy_theme"
 
+[output.html.fold]
+enable = true
+
 [output.katex]
 
 [preprocessor.katex]

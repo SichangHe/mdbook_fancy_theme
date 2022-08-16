@@ -50,18 +50,17 @@ const sidebar_aria = () => {
 const configure_sidebar = () => {
     // Hide / unhide sidebar before it is displayed
     let sidebar = "hidden";
-    if (document.body.clientWidth >= 1080) {
-        try {
-            sidebar = localStorage.getItem("mdbook-sidebar");
-        } catch (e) {}
-        sidebar = sidebar || "visible";
-    }
+    try {
+        sidebar = localStorage.getItem("mdbook-sidebar");
+    } catch (e) {}
+    sidebar = sidebar || "visible";
     html.classList.remove("sidebar-visible");
     html.classList.add("sidebar-" + sidebar);
 };
 
+configure_sidebar();
+
 const load = () => {
-    configure_sidebar();
     sidebar_aria();
     codeSnippets();
     themes();

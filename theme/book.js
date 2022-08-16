@@ -3,6 +3,77 @@
 // Fix back button cache problem
 window.onunload = function () {};
 
+var html = document.querySelector("html");
+
+// Set the theme before any content is loaded, prevents flash
+let theme;
+try {
+    theme = localStorage.getItem("mdbook-theme");
+    // Work around some values being stored in localStorage wrapped in quotes
+    if (theme.startsWith('"') && theme.endsWith('"')) {
+        localStorage.setItem("mdbook-theme", theme.slice(1, theme.length - 1));
+    }
+} catch (e) {}
+if (theme === null || theme === undefined) {
+    theme = default_theme;
+}
+html.classList.remove("no-js");
+html.classList.remove(default_theme);
+html.classList.add(theme);
+html.classList.add("js");
+
+const sidebar_aria = () => {
+    try {
+        let sidebar = localStorage.getItem("mdbook-sidebar");
+        // Work around some values being stored in localStorage wrapped in quotes
+        if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+            localStorage.setItem(
+                "mdbook-sidebar",
+                sidebar.slice(1, sidebar.length - 1)
+            );
+        }
+    } catch (e) {}
+    // Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM
+    document
+        .getElementById("sidebar-toggle")
+        .setAttribute("aria-expanded", sidebar === "visible");
+    document
+        .getElementById("sidebar")
+        .setAttribute("aria-hidden", sidebar !== "visible");
+    Array.from(document.querySelectorAll("#sidebar a")).forEach(function (
+        link
+    ) {
+        link.setAttribute("tabIndex", sidebar === "visible" ? 0 : -1);
+    });
+};
+
+const configure_sidebar = () => {
+    // Hide / unhide sidebar before it is displayed
+    let sidebar = "hidden";
+    if (document.body.clientWidth >= 1080) {
+        try {
+            sidebar = localStorage.getItem("mdbook-sidebar");
+        } catch (e) {}
+        sidebar = sidebar || "visible";
+    }
+    html.classList.remove("sidebar-visible");
+    html.classList.add("sidebar-" + sidebar);
+};
+
+const load = () => {
+    configure_sidebar();
+    sidebar_aria();
+    codeSnippets();
+    themes();
+    sidebar();
+    chapterNavigation();
+    clipboard();
+    scrollToTop();
+    controllMenu();
+};
+
+window.addEventListener("load", load);
+
 // Global variable, shared between modules
 function playground_text(playground) {
     let code_block = playground.querySelector("code");
@@ -15,7 +86,7 @@ function playground_text(playground) {
     }
 }
 
-(function codeSnippets() {
+function codeSnippets() {
     function fetch_with_timeout(url, options, timeout = 6000) {
         return Promise.race([
             fetch(url, options),
@@ -320,10 +391,9 @@ function playground_text(playground) {
             });
         }
     });
-})();
+}
 
-(function themes() {
-    var html = document.querySelector("html");
+function themes() {
     var themeToggleButton = document.getElementById("theme-toggle");
     var themePopup = document.getElementById("theme-list");
     var themeColorMetaTag = document.querySelector('meta[name="theme-color"]');
@@ -486,9 +556,9 @@ function playground_text(playground) {
                 break;
         }
     });
-})();
+}
 
-(function sidebar() {
+function sidebar() {
     var html = document.querySelector("html");
     var sidebar = document.getElementById("sidebar");
     var sidebarLinks = document.querySelectorAll("#sidebar a");
@@ -631,9 +701,9 @@ function playground_text(playground) {
         // https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
         activeSection.scrollIntoView({ block: "center" });
     }
-})();
+}
 
-(function chapterNavigation() {
+function chapterNavigation() {
     document.addEventListener("keydown", function (e) {
         if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) {
             return;
@@ -661,9 +731,9 @@ function playground_text(playground) {
                 break;
         }
     });
-})();
+}
 
-(function clipboard() {
+function clipboard() {
     var clipButtons = document.querySelectorAll(".clip-button");
 
     function hideTooltip(elem) {
@@ -698,17 +768,17 @@ function playground_text(playground) {
     clipboardSnippets.on("error", function (e) {
         showTooltip(e.trigger, "Clipboard error!");
     });
-})();
+}
 
-(function scrollToTop() {
+function scrollToTop() {
     var menuTitle = document.querySelector(".menu-title");
 
     menuTitle.addEventListener("click", function () {
         document.scrollingElement.scrollTo({ top: 0, behavior: "smooth" });
     });
-})();
+}
 
-(function controllMenu() {
+function controllMenu() {
     var menu = document.getElementById("menu-bar");
 
     (function controllPosition() {
@@ -772,4 +842,4 @@ function playground_text(playground) {
             { passive: true }
         );
     })();
-})();
+}

@@ -667,8 +667,8 @@ ul#searchresults span.teaser em {
 }
 
 .chapter li {
-    display: flex;
     color: var(--sidebar-non-existant);
+    @apply flex justify-between p-4 text-3xl rounded-xl;
 }
 .chapter li a {
     display: block;
@@ -681,17 +681,19 @@ ul#searchresults span.teaser em {
     color: var(--sidebar-active);
 }
 
-.chapter li a.active {
-    color: var(--sidebar-active);
+.chapter li.expanded a {
+    color: var(--sidebar-bg);
+}
+.chapter li.expanded {
+    background-color: var(--searchresults-border-color);
 }
 
 .chapter li > a.toggle {
     cursor: pointer;
     display: block;
-    margin-left: auto;
-    padding: 0 10px;
     user-select: none;
     opacity: 0.68;
+    @apply px-8;
 }
 
 .chapter li > a.toggle div {
@@ -705,7 +707,6 @@ ul#searchresults span.teaser em {
 
 .chapter li.chapter-item {
     line-height: 1.5em;
-    margin-top: 0.6em;
 }
 
 .chapter li.expanded > a.toggle div {

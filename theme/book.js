@@ -3,7 +3,7 @@
 // Fix back button cache problem
 window.onunload = function () {};
 
-var html = document.querySelector("html");
+var html = document.documentElement;
 
 // Set the theme before any content is loaded, prevents flash
 let theme;
@@ -60,6 +60,90 @@ const configure_sidebar = () => {
 
 configure_sidebar();
 
+const add_toc = () => {
+    const h2s = document.querySelectorAll("h2");
+    if (h2s.length < 2) {
+        return () => 0;
+    }
+    const current_page_candidates = document.querySelectorAll(
+        ".chapter li.chapter-item.expanded"
+    );
+    const current_page =
+        current_page_candidates[current_page_candidates.length - 1];
+    const arrow_div = document.createElement("div");
+    arrow_div.textContent = "❱";
+    const toggle_anchor = document.createElement("a");
+    toggle_anchor.classList.add("toggle");
+    toggle_anchor.append(arrow_div);
+    toggle_anchor.addEventListener("click", () =>
+        current_page.classList.toggle("expanded")
+    );
+    current_page.append(toggle_anchor);
+    const toc_ol = document.createElement("ol");
+    toc_ol.classList.add("section");
+    const h2_w_toc = [];
+    for (const h2 of h2s) {
+        const anchor = document.createElement("a");
+        anchor.textContent = h2.textContent;
+        anchor.href = `#${h2.id}`;
+        anchor.classList.add("toc-item");
+        const header2 = document.createElement("li");
+        header2.classList.add("chapter-item");
+        header2.append(anchor);
+        h2_w_toc.push([h2, header2]);
+        toc_ol.append(header2);
+    }
+    const toc_li = document.createElement("li");
+    toc_li.append(toc_ol);
+    current_page.after(toc_li);
+    const highlight_current_h2 = async () => {
+        let found_current_h2 = false;
+        let last_passed_toc = null;
+        for (const [h2, toc] of h2_w_toc) {
+            if (!found_current_h2) {
+                if (window.innerHeight / 3 + window.scrollY > h2.offsetTop) {
+                    last_passed_toc = toc;
+                } else {
+                    found_current_h2 = true;
+                    if (last_passed_toc !== null) {
+                        last_passed_toc.classList.add("expanded");
+                    }
+                }
+            }
+            toc.classList.remove("expanded");
+        }
+        if (!found_current_h2 && last_passed_toc !== null) {
+            // The last h2 is the one to highlight
+            last_passed_toc.classList.add("expanded");
+        }
+    };
+    return highlight_current_h2;
+};
+
+const scrolling_effect = () => {
+    let active = false;
+    let scheduled = false;
+    const update_toc = add_toc();
+    const apply = () => {
+        scheduled = false;
+        update_toc();
+        if (scheduled) {
+            setTimeout(apply, 300);
+        } else {
+            active = false;
+        }
+    };
+    const schedule = () => {
+        if (active) {
+            scheduled = true;
+        } else {
+            active = true;
+            setTimeout(apply, 300);
+        }
+    };
+    window.addEventListener("scroll", schedule);
+};
+
 const load = () => {
     sidebar_aria();
     codeSnippets();
@@ -69,6 +153,7 @@ const load = () => {
     clipboard();
     scrollToTop();
     controllMenu();
+    scrolling_effect();
 };
 
 window.addEventListener("load", load);
@@ -223,8 +308,8 @@ function codeSnippets() {
             })
             .catch(
                 (error) =>
-                    (result_block.innerText =
-                        "Playground Communication: " + error.message)
+                (result_block.innerText =
+                    "Playground Communication: " + error.message)
             );
     }
 
@@ -665,7 +750,7 @@ function sidebar() {
                 time: Date.now(),
             };
         },
-        { passive: true }
+        {passive: true}
     );
 
     document.addEventListener(
@@ -681,7 +766,7 @@ function sidebar() {
                 if (
                     xDiff >= 0 &&
                     firstContact.x <
-                        Math.min(document.body.clientWidth * 0.25, 300)
+                    Math.min(document.body.clientWidth * 0.25, 300)
                 )
                     showSidebar();
                 else if (xDiff < 0 && curX < 300) hideSidebar();
@@ -689,7 +774,7 @@ function sidebar() {
                 firstContact = null;
             }
         },
-        { passive: true }
+        {passive: true}
     );
 
     // Scroll sidebar to current active section
@@ -698,7 +783,7 @@ function sidebar() {
         .querySelector(".active");
     if (activeSection) {
         // https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
-        activeSection.scrollIntoView({ block: "center" });
+        activeSection.scrollIntoView({block: "center"});
     }
 }
 
@@ -773,7 +858,7 @@ function scrollToTop() {
     var menuTitle = document.querySelector(".menu-title");
 
     menuTitle.addEventListener("click", function () {
-        document.scrollingElement.scrollTo({ top: 0, behavior: "smooth" });
+        document.scrollingElement.scrollTo({top: 0, behavior: "smooth"});
     });
 }
 
@@ -824,7 +909,7 @@ function controllMenu() {
                 }
                 prevScrollTop = scrollTop;
             },
-            { passive: true }
+            {passive: true}
         );
     })();
     (function controllBorder() {
@@ -838,7 +923,7 @@ function controllMenu() {
                     menu.classList.add("bordered");
                 }
             },
-            { passive: true }
+            {passive: true}
         );
     })();
 }

@@ -1,6 +1,8 @@
 # Summary
 
+- [Home](./index.md)
 - [Chapter 1](./chapter_1.md)
+    - [Chapter 1](./chapter_1.md)
     - [Article 1](./article_1.md)
     - [Article 2](./article_2.md)
     - [Article 3](./article_3.md)

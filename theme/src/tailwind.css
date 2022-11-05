@@ -672,7 +672,7 @@ ul#searchresults span.teaser em {
 
 .chapter ol {
     width: 100%;
-    @apply overflow-hidden max-h-[72rem] transition-[max-height] duration-1000;
+    @apply overflow-hidden max-h-[144rem] transition-[max-height] duration-1000;
 }
 
 .chapter li {
@@ -713,7 +713,7 @@ ul#searchresults span.teaser em {
 
 /* collapse the section */
 .chapter li:not(.expanded) + li > ol {
-    @apply overflow-hidden max-h-0 transition-[max-height] duration-500;
+    @apply overflow-hidden max-h-0 transition-[max-height] duration-200;
 }
 
 .chapter li.chapter-item {

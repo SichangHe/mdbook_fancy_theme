@@ -60,49 +60,68 @@ const configure_sidebar = () => {
 
 configure_sidebar();
 
-const add_toc = () => {
-    const h2s = document.querySelectorAll("h2");
-    if (h2s.length < 2) {
-        return () => 0;
-    }
+const get_current_page_in_toc = () => {
     const current_page_candidates = document.querySelectorAll(
         ".chapter li.chapter-item.expanded"
     );
-    const current_page =
-        current_page_candidates[current_page_candidates.length - 1];
+    return current_page_candidates[current_page_candidates.length - 1];
+}
+
+const append_toggle_anchor_to = (element) => {
     const arrow_div = document.createElement("div");
     arrow_div.textContent = "❱";
     const toggle_anchor = document.createElement("a");
     toggle_anchor.classList.add("toggle");
     toggle_anchor.append(arrow_div);
     toggle_anchor.addEventListener("click", () =>
-        current_page.classList.toggle("expanded")
+        element.classList.toggle("expanded")
     );
-    current_page.append(toggle_anchor);
+    element.append(toggle_anchor);
+}
+
+const expand_toggle_anchor_for = (element) => {
+    const anchor = document.createElement("a");
+    anchor.textContent = element.textContent;
+    anchor.href = `#${element.id}`;
+    anchor.classList.add("toc-item");
+    return anchor;
+}
+
+const append_subelement_references_to = (element_to_append_to, subelements) => {
     const toc_ol = document.createElement("ol");
     toc_ol.classList.add("section");
-    const h2_w_toc = [];
-    for (const h2 of h2s) {
-        const anchor = document.createElement("a");
-        anchor.textContent = h2.textContent;
-        anchor.href = `#${h2.id}`;
-        anchor.classList.add("toc-item");
-        const header2 = document.createElement("li");
-        header2.classList.add("chapter-item");
-        header2.append(anchor);
-        h2_w_toc.push([h2, header2]);
-        toc_ol.append(header2);
+    const subelement_w_refs = [];
+    for (const element of subelements) {
+        const subelement_ref = document.createElement("li");
+        subelement_ref.classList.add("chapter-item");
+        const anchor = expand_toggle_anchor_for(element);
+        subelement_ref.append(anchor);
+        subelement_w_refs.push([element, subelement_ref]);
+        toc_ol.append(subelement_ref);
     }
     const toc_li = document.createElement("li");
     toc_li.append(toc_ol);
-    current_page.after(toc_li);
+    element_to_append_to.after(toc_li);
+    return subelement_w_refs;
+}
+
+const add_toc = () => {
+    const h2s = document.querySelectorAll("h2");
+    if (h2s.length < 2) {
+        return () => 0;
+    }
+    const current_page = get_current_page_in_toc();
+    append_toggle_anchor_to(current_page);
+    const toc_ol = document.createElement("ol");
+    toc_ol.classList.add("section");
+    const h2_w_ref = append_subelement_references_to(current_page, h2s);
     const highlight_current_h2 = async () => {
         let found_current_h2 = false;
         let last_passed_toc = null;
-        for (const [h2, toc] of h2_w_toc) {
+        for (const [h2, ref] of h2_w_ref) {
             if (!found_current_h2) {
                 if (window.innerHeight / 3 + window.scrollY > h2.offsetTop) {
-                    last_passed_toc = toc;
+                    last_passed_toc = ref;
                 } else {
                     found_current_h2 = true;
                     if (last_passed_toc !== null) {
@@ -110,7 +129,7 @@ const add_toc = () => {
                     }
                 }
             }
-            toc.classList.remove("expanded");
+            ref.classList.remove("expanded");
         }
         if (!found_current_h2 && last_passed_toc !== null) {
             // The last h2 is the one to highlight
